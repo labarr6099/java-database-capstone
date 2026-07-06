@@ -102,3 +102,58 @@
   Call the renderFooter function to populate the footer in the page
 
 */
+export function renderFooter() {
+
+    const footer =
+        document.getElementById("footer");
+
+    footer.innerHTML = `
+        <footer class="footer">
+
+            <h3>Hospital Management System</h3>
+
+            <p>
+                © Copyright 2026
+            </p>
+
+            <div class="footer-column">
+                <h4>Company</h4>
+
+                <a href="#">About</a><br>
+
+                <a href="#">Careers</a><br>
+
+                <a href="#">Press</a>
+
+            </div>
+
+            <div class="footer-column">
+
+                <h4>Support</h4>
+
+                <a href="#">Account</a><br>
+
+                <a href="#">Help Center</a><br>
+
+                <a href="#">Contact</a>
+
+            </div>
+
+            <div class="footer-column">
+
+                <h4>Legal</h4>
+
+                <a href="#">Terms</a><br>
+
+                <a href="#">Privacy Policy</a><br>
+
+                <a href="#">Licensing</a>
+
+            </div>
+
+        </footer>
+    `;
+
+}
+
+renderFooter();

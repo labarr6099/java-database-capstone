@@ -122,4 +122,103 @@
 
   16. **Render the Header**: Finally, the `renderHeader()` function is called to initialize the header rendering process when the page loads.
 */
-   
+   export function header(){
+
+    return `
+        <header>
+
+            <h2>Hospital Management System</h2>
+
+        </header>
+    `;
+
+}
+export function renderHeader() {if (window.location.pathname.endsWith("/")) {
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("token");
+}
+const headerDiv = document.getElementById("header");
+const role = localStorage.getItem("userRole");
+const token = localStorage.getItem("token");
+if (
+    (role === "loggedPatient" ||
+     role === "admin" ||
+     role === "doctor") &&
+    !token
+) {
+    localStorage.removeItem("userRole");
+    alert("Session expired or invalid login. Please log in again.");
+    window.location.href = "/";
+    return;
+}
+let headerContent = "";
+if (role === "admin") {
+
+    headerContent += `
+        <button id="addDocBtn">Add Doctor</button>
+        <a href="#" id="logoutBtn">Logout</a>
+    `;
+
+}
+else if (role === "doctor") {
+
+    headerContent += `
+        <a href="/doctor/dashboard">Home</a>
+        <a href="#" id="logoutBtn">Logout</a>
+    `;
+
+}
+else if (role === "patient") {
+
+    headerContent += `
+        <button id="loginBtn">Login</button>
+        <button id="signupBtn">Sign Up</button>
+    `;
+
+}
+else if (role === "loggedPatient") {
+
+    headerContent += `
+        <a href="/pages/loggedPatientDashboard.html">Home</a>
+        <a href="/pages/patientAppointments.html">Appointments</a>
+        <a href="#" id="logoutPatientBtn">Logout</a>
+    `;
+
+}
+headerDiv.innerHTML = headerContent;
+function attachHeaderButtonListeners() {
+
+    const logoutBtn =
+        document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", logout);
+    }
+
+    const logoutPatientBtn =
+        document.getElementById("logoutPatientBtn");
+
+    if (logoutPatientBtn) {
+        logoutPatientBtn.addEventListener("click", logoutPatient);
+    }
+
+}
+attachHeaderButtonListeners();
+function logout() {
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+
+    window.location.href = "/";
+
+}
+function logoutPatient() {
+
+    localStorage.removeItem("token");
+
+    localStorage.setItem("userRole","patient");
+
+    window.location.href =
+    "/pages/patientDashboard.html";
+
+}
