@@ -1,6 +1,49 @@
 package com.project.back_end.mvc;
 
-public class DashboardController {
+
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.stereotype.Controller;
+    import org.springframework.web.bind.annotation.GetMapping;
+    import org.springframework.web.bind.annotation.PathVariable;
+    
+    import java.util.Map;
+    
+    @Controller
+    public class DashboardController {
+    
+        // Note: If your token validation service has a different class name 
+        // (e.g., AuthService or ValidationService), make sure to update the type here!
+        @Autowired
+        private TokenValidationService tokenValidationService; 
+    
+        @GetMapping("/adminDashboard/{token}")
+        public String adminDashboard(@PathVariable String token) {
+            // Call the service to validate the token for an admin
+            Map<String, String> errors = tokenValidationService.validateToken(token, "admin");
+            
+            // If the map is empty, there are no errors -> token is valid
+            if (errors.isEmpty()) {
+                return "admin/adminDashboard";
+            } else {
+                // Invalid token, redirect to the root login page
+                return "redirect:/"; 
+            }
+        }
+    
+        @GetMapping("/doctorDashboard/{token}")
+        public String doctorDashboard(@PathVariable String token) {
+            // Call the service to validate the token for a doctor
+            Map<String, String> errors = tokenValidationService.validateToken(token, "doctor");
+            
+            // If the map is empty, there are no errors -> token is valid
+            if (errors.isEmpty()) {
+                return "doctor/doctorDashboard";
+            } else {
+                // Invalid token, redirect to the root login page
+                return "redirect:/";
+            }
+        }
+    }   
 
 // 1. Set Up the MVC Controller Class:
 //    - Annotate the class with `@Controller` to indicate that it serves as an MVC controller returning view names (not JSON).
