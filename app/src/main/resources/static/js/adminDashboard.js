@@ -70,3 +70,87 @@
 
     If saving fails, show an error message
 */
+import { openModal } from '../components/modals.js';
+import { getDoctors, filterDoctors, saveDoctor } from './services/doctorServices.js';
+import { createDoctorCard } from './components/doctorCard.js';
+
+// Load Doctor Cards on Page Load
+async function loadDoctorCards() {
+    const contentDiv = document.getElementById("content");
+    contentDiv.innerHTML = ""; 
+    const doctors = await getDoctors();
+    renderDoctorCards(doctors);
+}
+
+// Utility function to render doctor cards
+function renderDoctorCards(doctors) {
+    const contentDiv = document.getElementById("content");
+    contentDiv.innerHTML = "";
+    
+    if (!doctors || doctors.length === 0) {
+        contentDiv.innerHTML = "<p>No doctors found</p>";
+        return;
+    }
+    
+    doctors.forEach(doctor => {
+        contentDiv.innerHTML += createDoctorCard(doctor);
+    });
+}
+
+// Implement Search and Filter Logic
+async function filterDoctorsOnChange() {
+    const name = document.getElementById("searchBar").value;
+    const time = document.getElementById("filterTime").value;
+    const specialty = document.getElementById("filterSpecialty").value;
+
+    const doctors = await filterDoctors(name, time, specialty);
+    renderDoctorCards(doctors);
+}
+
+// Handle Add Doctor Modal Form Submission
+window.adminAddDoctor = async function() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("Authentication error: No admin token found.");
+        return;
+    }
+
+    // Collect values from the modal form inputs
+    const name = document.getElementById("docName").value;
+    const specialty = document.getElementById("docSpecialty").value;
+    const email = document.getElementById("docEmail").value;
+    const password = document.getElementById("docPassword").value;
+    const mobile = document.getElementById("docMobile").value;
+    const time = document.getElementById("docTime").value;
+
+    const doctor = { name, specialty, email, password, mobile, time };
+
+    const response = await saveDoctor(doctor, token);
+    
+    if (response.success) {
+        alert(response.message);
+        loadDoctorCards(); // Refresh the list
+        // Note: You would also close the modal here if a closeModal() function exists
+    } else {
+        alert(response.message);
+    }
+};
+
+// Event Binding setup on DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+    loadDoctorCards();
+
+    const addDocBtn = document.getElementById('addDocBtn');
+    if (addDocBtn) {
+        addDocBtn.addEventListener('click', () => openModal('addDoctor'));
+    }
+
+    const searchBar = document.getElementById("searchBar");
+    if (searchBar) searchBar.addEventListener("input", filterDoctorsOnChange);
+
+    const filterTime = document.getElementById("filterTime");
+    if (filterTime) filterTime.addEventListener("change", filterDoctorsOnChange);
+
+    const filterSpecialty = document.getElementById("filterSpecialty");
+    if (filterSpecialty) filterSpecialty.addEventListener("change", filterDoctorsOnChange);
+});

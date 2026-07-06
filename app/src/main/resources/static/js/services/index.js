@@ -56,3 +56,97 @@
     - Log the error to the console
     - Show a generic error message
 */
+// Import Required Modules
+import { openModal } from '../components/modals.js';
+import { API_BASE_URL } from '../config/config.js';
+
+// Define API Endpoints
+const ADMIN_API = API_BASE_URL + '/admin';
+const DOCTOR_API = API_BASE_URL + '/doctor/login';
+
+// Setup Button Event Listeners
+window.onload = function () {
+    const adminBtn = document.getElementById('adminLogin');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            openModal('adminLogin');
+        });
+    }
+
+    const doctorBtn = document.getElementById('doctorLogin');
+    if (doctorBtn) {
+        doctorBtn.addEventListener('click', () => {
+            openModal('doctorLogin');
+        });
+    }
+};
+
+/**
+ * Helper function to set the role in localStorage 
+ * (as defined in render.js architecture)
+ */
+function selectRole(role) {
+    localStorage.setItem('role', role);
+}
+
+// Implement Admin Login Handler
+async function adminLoginHandler(username, password) {
+    const admin = { username, password };
+
+    try {
+        const response = await fetch(ADMIN_API, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(admin)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Assuming the token comes back as data.token or data.idToken
+            localStorage.setItem('token', data.token);
+            selectRole('admin');
+            
+            // Optional: Redirect or refresh view after successful login
+        } else {
+            alert("Invalid credentials!");
+        }
+    } catch (error) {
+        console.error("Error during admin login:", error);
+        alert("An unexpected error occurred. Please try again.");
+    }
+}
+
+// Implement Doctor Login Handler
+async function doctorLoginHandler(email, password) {
+    const doctor = { email, password };
+
+    try {
+        const response = await fetch(DOCTOR_API, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(doctor)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            selectRole('doctor');
+            
+            // Optional: Redirect or refresh view after successful login
+        } else {
+            alert("Invalid credentials!");
+        }
+    } catch (error) {
+        console.error("Error during doctor login:", error);
+        alert("An unexpected error occurred. Please try again.");
+    }
+}
+
+// Make handlers globally accessible for HTML inline event listeners (e.g., onclick)
+window.adminLoginHandler = adminLoginHandler;
+window.doctorLoginHandler = doctorLoginHandler;
+

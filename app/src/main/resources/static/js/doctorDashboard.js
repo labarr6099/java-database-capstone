@@ -52,3 +52,67 @@
     - Call renderContent() (assumes it sets up the UI layout)
     - Call loadAppointments() to display today's appointments by default
 */
+import { getAllAppointments } from './services/appointmentRecordService.js';
+import { createPatientRow } from './components/patientRows.js';
+
+// Initialize Global Variables
+let selectedDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+let token = localStorage.getItem('token');
+let patientName = "null";
+
+// Define loadAppointments() Function
+async function loadAppointments() {
+    const tbody = document.getElementById("patientTableBody");
+    tbody.innerHTML = "";
+
+    try {
+        const appointments = await getAllAppointments(selectedDate, patientName, token);
+
+        if (!appointments || appointments.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="100%">No Appointments found for today</td></tr>`;
+            return;
+        }
+
+        appointments.forEach(appointment => {
+            // Assuming appointment payload has patient details or is the patient payload
+            tbody.innerHTML += createPatientRow(appointment.patient || appointment);
+        });
+    } catch (error) {
+        console.error("Failed to load appointments:", error);
+        tbody.innerHTML = `<tr><td colspan="100%">Error loading appointments. Please try again later.</td></tr>`;
+    }
+}
+
+// Initial Render and Event Binding on Page Load
+document.addEventListener("DOMContentLoaded", () => {
+    loadAppointments();
+
+    const searchBar = document.getElementById("searchBar");
+    if (searchBar) {
+        searchBar.addEventListener("input", (e) => {
+            const val = e.target.value.trim();
+            patientName = val === "" ? "null" : val;
+            loadAppointments();
+        });
+    }
+
+    const todayButton = document.getElementById("todayButton");
+    const datePicker = document.getElementById("datePicker");
+
+    if (datePicker) {
+        datePicker.value = selectedDate; // Set initial picker date
+        datePicker.addEventListener("change", (e) => {
+            selectedDate = e.target.value;
+            loadAppointments();
+        });
+    }
+
+    if (todayButton) {
+        todayButton.addEventListener("click", () => {
+            const today = new Date().toISOString().split('T')[0];
+            selectedDate = today;
+            if (datePicker) datePicker.value = today;
+            loadAppointments();
+        });
+    }
+});
