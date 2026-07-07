@@ -1,0 +1,36 @@
+name: Backend Java CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+          
+      - name: Make Maven wrapper executable
+        run: |
+          sed -i 's/\r$//' ./mvnw
+          chmod +x ./mvnw
+        
+      - name: Compile Backend code
+        run: ./mvnw clean compile -DskipTests
+        
+      - name: Lint Java Code with Checkstyle
+        run: ./mvnw checkstyle:check -Dcheckstyle.failOnViolation=false
